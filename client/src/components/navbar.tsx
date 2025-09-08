@@ -5,7 +5,7 @@ import Link from "next/link";
 export default function Navbar() {
   return (
     <header className="border-b-[1px] border-gray-600 flex justify-between items-center">
-      <section className="flex items-center m-2 mx-4">
+      <section className="flex items-center m-2 ml-6">
         <Image src={logo} alt="" height={40} className="m-2" />
         <div className="text-xl mx-1">FloatChat</div>
       </section>

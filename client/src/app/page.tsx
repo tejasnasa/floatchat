@@ -4,12 +4,12 @@ import Map from "@/components/map";
 
 export default function Home() {
   return (
-    <main className="flex h-[90dvh]">
-      <Filters />
-      <section className="w-4/5">
+    <main className="flex h-[90dvh] flex-col">
+      <section className="h-[70%] flex">
+        <Filters />
         <Map />
-        <Data />
       </section>
+      <Data />
     </main>
   );
 }
