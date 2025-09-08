@@ -15,7 +15,7 @@ export default function Filters() {
           type="number"
           value={filters.minTemp}
           onChange={(e) => setFilters({ minTemp: Number(e.target.value) })}
-          className="w-full border rounded p-1 text-black"
+          className="w-full border rounded p-1 text-white bg-black"
         />
       </div>
 
@@ -25,7 +25,7 @@ export default function Filters() {
           type="number"
           value={filters.maxTemp}
           onChange={(e) => setFilters({ maxTemp: Number(e.target.value) })}
-          className="w-full border rounded p-1 text-black"
+          className="w-full border rounded p-1 text-white bg-black"
         />
       </div>
 
@@ -35,7 +35,7 @@ export default function Filters() {
           type="number"
           value={filters.minSalinity}
           onChange={(e) => setFilters({ minSalinity: Number(e.target.value) })}
-          className="w-full border rounded p-1 text-black"
+          className="w-full border rounded p-1 text-white bg-black"
         />
       </div>
 
@@ -45,7 +45,7 @@ export default function Filters() {
           type="number"
           value={filters.maxSalinity}
           onChange={(e) => setFilters({ maxSalinity: Number(e.target.value) })}
-          className="w-full border rounded p-1 text-black"
+          className="w-full border rounded p-1 text-white bg-black"
         />
       </div>
     </section>
