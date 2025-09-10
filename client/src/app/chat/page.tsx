@@ -1,5 +1,5 @@
 'use client';
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect, useRef } from 'react';
 
 type Role = 'user' | 'assistant';
 type Message = { role: Role; content: string };
@@ -7,27 +7,37 @@ const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: 'Hi! Ask me anything.' },
+    { role: 'assistant', content: 'Hi! I\'m FloatChat AI. Ask me anything about ocean data, buoys, or marine analytics.' },
   ]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [graphData, setGraphData] = useState<any | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!input.trim() || sending) return;
 
     const userText = input.trim();
-    // Optimistically add user + a placeholder assistant bubble
-    setMessages((m) => [...m, { role: 'user', content: userText }, { role: 'assistant', content: '…' }]);
+    setMessages((m) => [...m, { role: 'user', content: userText }]);
     setInput('');
     setSending(true);
+
+    // Add typing indicator
+    setMessages((m) => [...m, { role: 'assistant', content: '…' }]);
 
     try {
       const res = await fetch(`${backendUrl}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // 🔁 Backend expects `user_prompt`; it can also accept `history` if you want
         body: JSON.stringify({
           user_prompt: userText,
           history: messages,
@@ -39,30 +49,28 @@ export default function Chat() {
       }
 
       const { generated_answer, graph_data } = await res.json();
-
       setGraphData(graph_data ?? null);
 
-      // Replace the last assistant stub with the actual answer
+      // Replace the typing indicator with actual response
       setMessages((prev) => {
         const next = [...prev];
         const last = next[next.length - 1];
         if (last?.role === 'assistant') {
           next[next.length - 1] = {
             ...last,
-            content: (generated_answer ?? '').trim() || 'I couldn’t generate a response.',
+            content: (generated_answer ?? '').trim() || 'I couldn\'t generate a response.',
           };
         }
         return next;
       });
     } catch (err: any) {
-      // Replace the last assistant stub with an error message
       setMessages((prev) => {
         const next = [...prev];
         const last = next[next.length - 1];
         if (last?.role === 'assistant') {
           next[next.length - 1] = {
             ...last,
-            content: 'Oops, something went wrong.',
+            content: 'Sorry, I encountered an error. Please try again.',
           };
         }
         return next;
@@ -73,65 +81,185 @@ export default function Chat() {
     }
   }
 
-  return (
-    <div style={{ maxWidth: 700, margin: '40px auto', padding: 16 }}>
-      <h2>FloatChat</h2>
+  const formatTime = () => {
+    return new Date().toLocaleTimeString('en-US', { 
+      hour12: true, 
+      hour: 'numeric', 
+      minute: '2-digit' 
+    });
+  };
 
-      <div style={{ border: '1px solid #eee', borderRadius: 8, padding: 12, minHeight: 320 }}>
-        {messages.map((m, i) => (
-          <div
-            key={i}
-            style={{
-              display: 'flex',
-              justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start',
-              margin: '8px 0'
-            }}
-          >
-            <div
-              style={{
-                background: m.role === 'user' ? '#1e293b' : '#e5e7eb',
-                color: m.role === 'user' ? '#fff' : '#111',
-                borderRadius: 12,
-                padding: '8px 12px',
-                maxWidth: '80%',
-                whiteSpace: 'pre-wrap'
-              }}
-            >
-              {m.content}
+  return (
+    <div className="h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute inset-0 bg-gradient-to-r from-violet-500/5 via-purple-500/5 to-fuchsia-500/5"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-violet-600/10 via-transparent to-transparent"></div>
+      
+      {/* Animated background particles */}
+      <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-violet-500/8 rounded-full blur-3xl animate-pulse"></div>
+      <div className="absolute bottom-1/3 right-1/4 w-24 h-24 bg-purple-500/8 rounded-full blur-2xl animate-pulse" style={{ animationDelay: "2s" }}></div>
+
+      {/* Header */}
+      <div className="relative z-10 bg-slate-900/80 backdrop-blur-xl border-b border-slate-700/50 p-4">
+        <div className="flex items-center space-x-4 max-w-4xl mx-auto">
+          <div className="w-12 h-12 bg-gradient-to-br from-violet-500/20 to-purple-500/20 rounded-2xl border border-violet-400/30 flex items-center justify-center backdrop-blur-sm shadow-2xl shadow-violet-500/20">
+            <span className="text-2xl">🤖</span>
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-violet-400 via-purple-400 to-fuchsia-400 bg-clip-text text-transparent">
+              FloatChat AI
+            </h1>
+            <p className="text-sm text-slate-400 font-medium">Ocean Data Intelligence Assistant</p>
+          </div>
+          <div className="ml-auto flex items-center space-x-2">
+            <div className="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-emerald-500/10 to-green-500/10 rounded-lg border border-emerald-400/20">
+              <div className="w-2 h-2 bg-gradient-to-r from-emerald-400 to-green-400 rounded-full animate-pulse"></div>
+              <span className="text-xs text-emerald-300 font-bold">ONLINE</span>
             </div>
           </div>
-        ))}
-
-        {sending && <div style={{ opacity: 0.6 }}>Assistant is thinking…</div>}
+        </div>
       </div>
 
-      {/* Optional: show graph data if backend returns it */}
+      {/* Messages Container */}
+      <div className="relative z-10 flex-1 overflow-y-auto p-4 pb-24 max-w-4xl mx-auto h-[calc(100vh-140px)]">
+        <div className="space-y-4">
+          {messages.map((message, index) => (
+            <div
+              key={index}
+              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div className={`max-w-[70%] ${message.role === 'user' ? 'order-2' : 'order-1'}`}>
+                {/* Message bubble */}
+                <div
+                  className={`relative px-4 py-3 rounded-2xl shadow-lg ${
+                    message.role === 'user'
+                      ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-br-md'
+                      : 'bg-slate-800/80 backdrop-blur-sm border border-slate-700/50 text-slate-100 rounded-bl-md'
+                  }`}
+                >
+                  {/* Typing animation for assistant */}
+                  {message.content === '…' && message.role === 'assistant' ? (
+                    <div className="flex items-center space-x-1 py-2">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-pulse"></div>
+                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                      </div>
+                      <span className="text-xs text-slate-400 ml-2">AI is thinking...</span>
+                    </div>
+                  ) : (
+                    <div className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</div>
+                  )}
+                  
+                  {/* Message tail */}
+                  <div
+                    className={`absolute bottom-0 w-4 h-4 ${
+                      message.role === 'user'
+                        ? 'right-0 bg-gradient-to-r from-violet-600 to-purple-600'
+                        : 'left-0 bg-slate-800/80 border-l border-b border-slate-700/50'
+                    } transform rotate-45 translate-y-2 ${
+                      message.role === 'user' ? 'translate-x-2' : '-translate-x-2'
+                    }`}
+                  ></div>
+                </div>
+                
+                {/* Timestamp */}
+                <div className={`text-xs text-slate-500 mt-1 px-1 ${
+                  message.role === 'user' ? 'text-right' : 'text-left'
+                }`}>
+                  {formatTime()}
+                </div>
+              </div>
+
+              {/* Avatar */}
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
+                message.role === 'user' 
+                  ? 'order-1 ml-3 bg-gradient-to-br from-violet-500 to-purple-500 text-white' 
+                  : 'order-2 mr-3 bg-gradient-to-br from-slate-700 to-slate-600 text-slate-300'
+              }`}>
+                {message.role === 'user' ? '👤' : '🤖'}
+              </div>
+            </div>
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
+      </div>
+
+      {/* Graph Data Display */}
       {graphData && (
-        <pre
-          style={{
-            marginTop: 12,
-            background: '#0b0f19',
-            color: '#e5e7eb',
-            padding: 12,
-            borderRadius: 8,
-            overflowX: 'auto'
-          }}
-        >
-          {JSON.stringify(graphData, null, 2)}
-        </pre>
+        <div className="relative z-10 max-w-4xl mx-auto px-4 mb-4">
+          <div className="bg-slate-900/80 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-4 shadow-2xl">
+            <div className="flex items-center space-x-2 mb-3">
+              <div className="w-6 h-6 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-lg flex items-center justify-center">
+                <span className="text-sm">📊</span>
+              </div>
+              <h3 className="text-sm font-bold text-emerald-400">Data Visualization</h3>
+            </div>
+            <pre className="text-xs text-slate-300 overflow-x-auto bg-slate-800/50 rounded-lg p-3 border border-slate-700/30">
+              {JSON.stringify(graphData, null, 2)}
+            </pre>
+          </div>
+        </div>
       )}
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type a message..."
-          style={{ flex: 1, padding: 10, borderRadius: 8, border: '1px solid #ddd', color: '#111' }}
-        />
-        <button type="submit" disabled={sending} style={{ padding: '10px 16px', borderRadius: 8, background: '#111', color: '#fff' }}>
-          Send
-        </button>
-      </form>
+      {/* Fixed Input at Bottom */}
+      <div className="fixed bottom-0 left-0 right-0 z-20 bg-slate-900/95 backdrop-blur-xl border-t border-slate-700/50 p-4">
+        <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
+          <div className="flex items-end space-x-3">
+            <div className="flex-1 relative">
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit(e as any);
+                  }
+                }}
+                placeholder="Ask about ocean data, buoys, marine analytics..."
+                disabled={sending}
+                rows={1}
+                className="w-full resize-none rounded-2xl bg-slate-800/80 backdrop-blur-sm border border-slate-600/50 text-white placeholder-slate-400 px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all duration-300 text-sm leading-relaxed"
+                style={{ minHeight: '44px', maxHeight: '120px' }}
+              />
+              
+              {/* Input decorations */}
+              <div className="absolute right-3 bottom-3 flex items-center space-x-2">
+                {input.trim() && (
+                  <div className="text-xs text-slate-500 font-mono">
+                    {input.length}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <button
+              type="submit"
+              disabled={sending || !input.trim()}
+              className="w-12 h-12 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 disabled:from-slate-600 disabled:to-slate-700 text-white rounded-2xl flex items-center justify-center transition-all duration-300 shadow-lg hover:shadow-violet-500/25 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 disabled:hover:scale-100"
+            >
+              {sending ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <span className="text-lg">🚀</span>
+              )}
+            </button>
+          </div>
+          
+          {/* Quick actions */}
+          <div className="flex items-center space-x-2 mt-3">
+            {['Show buoy data', 'Ocean temperature trends', 'Salinity analysis'].map((suggestion) => (
+              <button
+                key={suggestion}
+                onClick={() => setInput(suggestion)}
+                className="px-3 py-1.5 bg-slate-800/60 hover:bg-slate-700/60 text-slate-300 hover:text-white text-xs rounded-lg border border-slate-600/30 hover:border-slate-500/50 transition-all duration-200"
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
