@@ -1,6 +1,6 @@
-import Data from "@/components/data";
-import Filters from "@/components/filters";
-import Map from "@/components/map";
+import Data from "@/components/dashboard/data";
+import Filters from "@/components/dashboard/filters";
+import Map from "@/components/dashboard/map";
 
 export default function Home() {
   return (
