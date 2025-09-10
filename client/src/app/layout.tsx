@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Enriqueta } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/navbar";
+import Navbar from "@/components/dashboard/navbar";
 
 const enriqueta = Enriqueta({
   weight: "400",

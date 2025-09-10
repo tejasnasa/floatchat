@@ -1,11 +1,24 @@
 import { create } from "zustand";
 
-interface Buoy {
-  id: number;
-  lat: number;
-  lon: number;
+export interface BuoyRecord {
+  latitude: number;
+  longitude: number;
+  status: string;
+  buoyId: string;
+  temperature: number;
+  depth: number;
+  density: number;
   salinity: number;
-  temp: number;
+}
+
+export interface GroupedBuoy {
+  buoyId: string;
+  latitude: number;
+  longitude: number;
+  status: string;
+  yearly: {
+    [year: string]: BuoyRecord[];
+  };
 }
 
 interface Filters {
@@ -13,11 +26,13 @@ interface Filters {
   maxTemp: number;
   minSalinity: number;
   maxSalinity: number;
+  minDensity: number;
+  maxDensity: number;
 }
 
 interface StoreState {
-  selectedBuoy: Buoy | null;
-  setSelectedBuoy: (buoy: Buoy | null) => void;
+  selectedBuoy: GroupedBuoy | null;
+  setSelectedBuoy: (buoy: GroupedBuoy | null) => void;
 
   filters: Filters;
   setFilters: (filters: Partial<Filters>) => void;
@@ -32,6 +47,8 @@ export const useBuoyStore = create<StoreState>((set) => ({
     maxTemp: 40,
     minSalinity: 30,
     maxSalinity: 40,
+    minDensity: 0,
+    maxDensity: 1100,
   },
   setFilters: (filters) =>
     set((state) => ({
