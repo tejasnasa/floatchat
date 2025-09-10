@@ -186,13 +186,13 @@ export default function Data() {
             </span>
           </div>
           <div className="flex justify-between items-center py-1">
-            <span className="text-slate-400 font-medium">Lat:</span>
+            <span className="text-slate-400 font-medium">Latitude:</span>
             <span className="text-slate-200 font-mono">
               {selectedBuoy.latitude.toFixed(4)}
             </span>
           </div>
           <div className="flex justify-between items-center py-1">
-            <span className="text-slate-400 font-medium">Lng:</span>
+            <span className="text-slate-400 font-medium">Longitude:</span>
             <span className="text-slate-200 font-mono">
               {selectedBuoy.longitude.toFixed(4)}
             </span>
@@ -201,7 +201,7 @@ export default function Data() {
       </div>
 
       <div className="relative z-10 flex-1 flex flex-col w-[70%] p-4 pb-2">
-        <div className="h-full bg-slate-800/20 backdrop-blur-sm rounded-lg border border-slate-700/30 p-4">
+        <div className="h-full bg-slate-800/20 backdrop-blur-sm rounded-lg border border-slate-700/30 p-2">
           <Line
             data={{
               labels,
@@ -218,7 +218,6 @@ export default function Data() {
                   } Trends`,
                   color: "#f8fafc",
                   font: { size: 16, weight: 600 },
-                  padding: 20,
                 },
               },
             }}
@@ -238,8 +237,8 @@ export default function Data() {
             onClick={() => setActiveTab(metric)}
           >
             <div className="absolute inset-0 bg-gradient-to-r opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-            <div className="relative z-10 flex flex-col items-center justify-center h-full space-y-1">
-              <span className="text-lg">{metricConfig[metric].icon}</span>
+            <div className="relative z-10 flex items-center justify-start h-full space-y-1">
+              <span className="text-lg m-[6px]">{metricConfig[metric].icon}</span>
               <span className="capitalize leading-tight">{metric}</span>
             </div>
             {activeTab === metric && (

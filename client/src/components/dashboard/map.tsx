@@ -31,7 +31,7 @@ export default function Map() {
   });
 
   return (
-    <div className="w-4/5">
+    <div className="h-[70%]">
       <MapContainer
         center={[10, 80]}
         zoom={6}
